@@ -254,7 +254,7 @@
 
     <!-- Footer -->
     <footer class="bg-gray-100 border-t border-gray-200 mt-auto py-6 text-center text-gray-500 text-sm no-print">
-        <p>© 2026 Korea Federation of Credit Guarantee Foundations. All rights reserved.</p>
+        <p>© 2026 INSIDECREATIVE(인사이드크리에이티브). All rights reserved.</p>
         <button onclick="openAdminAuth()" class="mt-2 text-gray-400 hover:text-koreg-main text-xs underline underline-offset-2">관리자 모드</button>
     </footer>
 
@@ -581,7 +581,7 @@
         }
 
         function openAdminAuth() {
-            showAlert('관리자 인증', '강사용 통계 확인을 위해 비밀번호를 입력하세요. (힌트: 1234)', 'prompt', (val, closeFn) => {
+            showAlert('관리자 인증', '강사용 통계 확인을 위해 비밀번호를 입력하세요.', 'prompt', (val, closeFn) => {
                 if(val === '1234') {
                     closeFn();
                     showAdminDashboard();
