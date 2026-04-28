@@ -215,6 +215,10 @@
                             <p class="text-xs text-blue-800 mb-1">전체 평균 점수</p>
                             <p class="text-3xl font-bold text-koreg-main" id="admin-avg-total">0.0</p>
                         </div>
+                        <div class="p-4 bg-indigo-50 rounded-lg border border-indigo-100">
+                            <p class="text-xs text-indigo-800 mb-1">종합 활용 수준</p>
+                            <p class="text-2xl font-bold text-indigo-700" id="admin-level">-</p>
+                        </div>
                         <div class="p-4 bg-gray-50 rounded-lg border border-gray-200">
                             <p class="text-xs text-gray-600 mb-1">참여자 수</p>
                             <p class="text-xl font-bold text-gray-800"><span id="admin-participant-count">10</span>명</p>
@@ -254,7 +258,7 @@
 
     <!-- Footer -->
     <footer class="bg-gray-100 border-t border-gray-200 mt-auto py-6 text-center text-gray-500 text-sm no-print">
-        <p>© 2026 INSIDECREATIVE(인사이드크리에이티브). All rights reserved.</p>
+        <p>© 2026 INSIDECREATIVE All rights reserved.</p>
         <button onclick="openAdminAuth()" class="mt-2 text-gray-400 hover:text-koreg-main text-xs underline underline-offset-2">관리자 모드</button>
     </footer>
 
@@ -610,6 +614,8 @@
 
             if (participantCount === 0) {
                 document.getElementById('admin-avg-total').innerText = '0.0점';
+                document.getElementById('admin-level').innerText = '-';
+                document.getElementById('admin-level').className = 'text-2xl font-bold text-gray-500';
                 document.getElementById('admin-subjective-list').innerHTML = '<tr><td colspan="5" class="px-4 py-8 text-center text-gray-500">제출된 응답 데이터가 없습니다.</td></tr>';
                 updateAdminChart([], []);
                 return;
@@ -658,6 +664,26 @@
             // Overall Average
             const overallAvg = (grandTotal / totalAnswers).toFixed(2);
             document.getElementById('admin-avg-total').innerText = `${overallAvg}점`;
+
+            // Calculate Level (상, 중, 하)
+            const avgNum = parseFloat(overallAvg);
+            let levelText = "";
+            let levelClass = "";
+            
+            if (avgNum >= 4.0) {
+                levelText = "상 (우수)";
+                levelClass = "text-2xl font-bold text-blue-700";
+            } else if (avgNum >= 3.0) {
+                levelText = "중 (보통)";
+                levelClass = "text-2xl font-bold text-green-600";
+            } else {
+                levelText = "하 (기초)";
+                levelClass = "text-2xl font-bold text-orange-500";
+            }
+            
+            const levelEl = document.getElementById('admin-level');
+            levelEl.innerText = levelText;
+            levelEl.className = levelClass;
 
             // Render subjective table
             document.getElementById('admin-subjective-list').innerHTML = subjListHTML.join('');
