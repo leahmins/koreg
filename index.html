@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>신용보증재단 과장 승진자 AI 역량 진단</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        koreg: {
+                            main: '#004c97',
+                            light: '#e5f0f9',
+                            dark: '#00356b',
+                            accent: '#00a0e9',
+                            bg: '#f8fafc'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['"Noto Sans KR"', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: 'Noto Sans KR', sans-serif; background-color: #f8fafc; }
+        .radio-custom:checked + div { background-color: #004c97; color: white; border-color: #004c97; font-weight: 500; }
+        .radio-custom + div { transition: all 0.2s ease-in-out; }
+        
+        /* 모바일 테이블 스크롤 및 최소 너비 보장 */
+        .scale-container { min-width: 600px; }
+        
+        /* 스크롤바 커스텀 */
+        ::-webkit-scrollbar { height: 8px; width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        @media print {
+            body { background-color: white; }
+            .no-print { display: none !important; }
+            .print-full { width: 100% !important; max-width: none !important; margin: 0 !important; box-shadow: none !important; }
+            canvas { max-width: 100% !important; height: auto !important; }
+        }
+    </style>
+</head>
+<body class="text-gray-800 antialiased flex flex-col min-h-screen">
+
+    <!-- Header -->
+    <header class="bg-koreg-main text-white py-4 shadow-md no-print">
+        <div class="max-w-4xl mx-auto px-4 md:px-6 flex justify-between items-center">
+            <h1 class="text-lg md:text-xl font-bold tracking-tight">신용보증재단중앙회 AI 교육</h1>
+            <span class="text-sm bg-koreg-dark px-3 py-1 rounded-full">과장 승진자 과정</span>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="flex-grow max-w-4xl mx-auto px-4 md:px-6 py-8 w-full print-full">
+        
+        <!-- View 1: Intro -->
+        <div id="view-intro" class="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center transition-all duration-300">
+            <div class="w-16 h-16 bg-koreg-light rounded-full flex items-center justify-center mx-auto mb-6">
+                <svg class="w-8 h-8 text-koreg-main" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+            </div>
+            <h2 class="text-2xl md:text-3xl font-bold text-gray-900 mb-4">AI 역량 진단 및 교육 수요 조사</h2>
+            <p class="text-gray-600 mb-8 leading-relaxed max-w-2xl mx-auto">
+                안녕하십니까? 본 조사는 신용보증재단 과장 승진자 대상 AI 교육의 효과적인 진행을 위해 실시됩니다.<br>
+                특히 이번 교육에서 중점적으로 다룰 <strong>Gemini</strong>와 <strong>NotebookLM</strong>에 대한 사전 경험을 파악하여 맞춤형 교육을 제공하고자 하오니, 솔직하게 답변해 주시기 바랍니다.
+            </p>
+            <div class="bg-blue-50 text-blue-800 p-4 rounded-lg text-sm mb-8 inline-block text-left">
+                <ul class="list-disc list-inside space-y-1">
+                    <li><strong>소요 시간:</strong> 약 3~5분</li>
+                    <li><strong>문항 구성:</strong> 객관식 6문항, 주관식 3문항 (총 9문항)</li>
+                </ul>
+            </div>
+            <br>
+            <button onclick="startSurvey()" class="bg-koreg-main hover:bg-koreg-dark text-white font-bold py-3 px-10 rounded-lg shadow-md transition-colors text-lg">
+                진단 시작하기
+            </button>
+        </div>
+
+        <!-- View 2: Survey Form -->
+        <div id="view-survey" class="hidden">
+            <div class="mb-6">
+                <h2 class="text-2xl font-bold text-gray-900 mb-2">사전 역량 진단</h2>
+                <p class="text-gray-500 text-sm">모든 문항에 답변해주셔야 제출이 가능합니다.</p>
+            </div>
+
+            <form id="surveyForm" onchange="checkFormValidity()" oninput="checkFormValidity()">
+                
+                <!-- Section 1: Objective Questions -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
+                    <div class="bg-koreg-light px-6 py-4 border-b border-gray-200">
+                        <h3 class="font-bold text-koreg-main text-lg">Part 1. AI 활용 능력 (객관식)</h3>
+                    </div>
+                    <div class="p-6 space-y-8" id="objective-container">
+                        <!-- Questions will be injected here via JS -->
+                    </div>
+                </div>
+
+                <!-- Section 2: Subjective Questions -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-8">
+                    <div class="bg-koreg-light px-6 py-4 border-b border-gray-200">
+                        <h3 class="font-bold text-koreg-main text-lg">Part 2. 업무 적용 및 기대 (주관식)</h3>
+                    </div>
+                    <div class="p-6 space-y-6" id="subjective-container">
+                        <!-- Questions will be injected here via JS -->
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="flex justify-end no-print">
+                    <button type="button" id="btnSubmit" onclick="submitSurvey()" disabled class="bg-gray-300 text-gray-500 font-bold py-3 px-8 rounded-lg cursor-not-allowed transition-colors">
+                        결과 보기 (제출)
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- View 3: User Result -->
+        <div id="view-result" class="hidden">
+            <div class="text-center mb-8">
+                <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 no-print">
+                    <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                </div>
+                <h2 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2">진단 결과</h2>
+                <p class="text-gray-600">참여해 주셔서 감사합니다. 입력하신 결과를 바탕으로 영역별 점수를 확인하세요.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <!-- Chart Area -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 flex flex-col items-center justify-center">
+                    <h3 class="font-bold text-gray-800 mb-4 self-start">영역별 점수 분포 (5점 만점)</h3>
+                    <div class="w-full h-64 relative">
+                        <canvas id="userResultChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Detailed Score Table -->
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                    <h3 class="font-bold text-gray-800 mb-4">상세 점수</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left text-gray-500">
+                            <thead class="text-xs text-gray-700 bg-gray-50">
+                                <tr>
+                                    <th scope="col" class="px-4 py-3 rounded-tl-lg">평가 항목</th>
+                                    <th scope="col" class="px-4 py-3 text-right rounded-tr-lg w-24">점수</th>
+                                </tr>
+                            </thead>
+                            <tbody id="result-table-body" class="divide-y divide-gray-200">
+                                <!-- Table rows injected here -->
+                            </tbody>
+                            <tfoot>
+                                <tr class="font-bold text-gray-900 bg-gray-50">
+                                    <td class="px-4 py-3 rounded-bl-lg">전체 평균</td>
+                                    <td class="px-4 py-3 text-right text-koreg-main rounded-br-lg" id="total-average-score">-</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-200 mb-8">
+                <h3 class="font-bold text-gray-800 mb-4">작성한 주관식 답변</h3>
+                <div id="result-subjective-list" class="space-y-4 text-sm">
+                    <!-- Subjective answers injected here -->
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex flex-col sm:flex-row justify-center gap-4 no-print">
+                <button onclick="resetSurvey()" class="border-2 border-koreg-main text-koreg-main hover:bg-koreg-light font-bold py-3 px-8 rounded-lg transition-colors">
+                    다시 검사하기
+                </button>
+                <button onclick="window.print()" class="bg-koreg-main hover:bg-koreg-dark text-white font-bold py-3 px-8 rounded-lg shadow-md transition-colors flex items-center justify-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                    결과 화면 인쇄 (PDF)
+                </button>
+            </div>
+        </div>
+
+        <!-- View 4: Admin Dashboard (Hidden for users) -->
+        <div id="view-admin" class="hidden">
+            <div class="flex justify-between items-center mb-6 no-print">
+                <div>
+                    <h2 class="text-2xl font-bold text-koreg-main">강사 전용: 교육생 수준 분석 (10명)</h2>
+                    <p class="text-gray-500 text-sm">본 화면은 관리자에게만 노출됩니다.</p>
+                </div>
+                <button onclick="exitAdmin()" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 text-sm font-medium">나가기</button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="bg-white p-6 rounded-xl shadow border border-gray-200 col-span-1 md:col-span-2">
+                    <h3 class="font-bold text-gray-800 mb-4">그룹 평균 역량 분포 (10명)</h3>
+                    <div class="w-full h-72 relative flex justify-center">
+                        <canvas id="adminResultChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="bg-white p-6 rounded-xl shadow border border-gray-200 flex flex-col justify-center">
+                    <h3 class="font-bold text-gray-800 mb-2">종합 분석 요약</h3>
+                    <div class="space-y-4 mt-4">
+                        <div class="p-4 bg-blue-50 rounded-lg border border-blue-100">
+                            <p class="text-xs text-blue-800 mb-1">전체 평균 점수</p>
+                            <p class="text-3xl font-bold text-koreg-main" id="admin-avg-total">0.0</p>
+                        </div>
+                        <div class="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                            <p class="text-xs text-gray-600 mb-1">참여자 수</p>
+                            <p class="text-xl font-bold text-gray-800"><span id="admin-participant-count">10</span>명</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-xl shadow border border-gray-200 mb-8">
+                <h3 class="font-bold text-gray-800 mb-4">교육생 주관식 기대사항 및 활용 툴 현황</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm text-left text-gray-600 border-collapse">
+                        <thead class="text-xs text-gray-700 bg-gray-100">
+                            <tr>
+                                <th class="px-4 py-3 border border-gray-200 w-12 text-center">No</th>
+                                <th class="px-4 py-3 border border-gray-200 w-1/4">도입 기대 분야</th>
+                                <th class="px-4 py-3 border border-gray-200 w-1/4">교육 기대/궁금한 점</th>
+                                <th class="px-4 py-3 border border-gray-200 w-1/4">사용 중인 AI 툴</th>
+                                <th class="px-4 py-3 border border-gray-200 w-16 text-center no-print">관리</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-subjective-list" class="divide-y divide-gray-200 bg-white">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div class="flex justify-center no-print">
+                <button onclick="window.print()" class="bg-gray-800 hover:bg-gray-900 text-white font-bold py-2 px-6 rounded-lg shadow transition-colors">
+                    분석 보고서 인쇄
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-100 border-t border-gray-200 mt-auto py-6 text-center text-gray-500 text-sm no-print">
+        <p>© 2026 Korea Federation of Credit Guarantee Foundations. All rights reserved.</p>
+        <button onclick="openAdminAuth()" class="mt-2 text-gray-400 hover:text-koreg-main text-xs underline underline-offset-2">관리자 모드</button>
+    </footer>
+
+    <!-- Custom Message Box (Modal) -->
+    <div id="customAlert" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-black bg-opacity-50 transition-opacity">
+        <div class="bg-white rounded-xl shadow-xl max-w-sm w-full mx-4 overflow-hidden transform scale-95 transition-transform duration-200" id="alertBox">
+            <div class="p-6 text-center">
+                <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-6 h-6 text-koreg-main" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                </div>
+                <h3 class="text-lg font-bold text-gray-900 mb-2" id="alertTitle">알림</h3>
+                <p class="text-sm text-gray-600 mb-6" id="alertMessage">메시지 내용</p>
+                <div id="alertInputs" class="mb-4 hidden">
+                    <input type="password" id="adminPassword" placeholder="비밀번호 입력" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-koreg-main focus:border-koreg-main outline-none text-center text-lg tracking-widest">
+                </div>
+                <div class="flex gap-2 justify-center" id="alertButtons">
+                    <!-- Buttons injected dynamically -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // Data Structure
+        const scaleLabels = ["(1) 전혀 그렇지 않다", "(2) 그렇지 않다", "(3) 보통이다", "(4) 그렇다", "(5) 매우 그렇다"];
+        
+        const objectiveQuestions = [
+            { id: "q1", category: "기본 활용", text: "나는 ChatGPT, Gemini 등 생성형 AI를 업무나 일상에서 활용해 본 경험이 있다." },
+            { id: "q2", category: "Gemini 활용", text: "나는 Gemini를 활용하여 문서 초안 작성, 아이디어 도출 등 텍스트 생성 업무를 수행할 수 있다." },
+            { id: "q3", category: "NotebookLM 활용", text: "나는 NotebookLM에 PDF 등 문서를 업로드하여 요약하거나 필요한 정보를 추출해 본 경험이 있다." },
+            { id: "q4", category: "프롬프트 작성", text: "나는 AI에게 적절한 프롬프트(명령어)를 작성하여 원하는 형태의 결과물을 얻을 수 있다." },
+            { id: "q5", category: "업무 적용", text: "나는 Gemini와 NotebookLM을 활용하면 신용보증재단의 핵심 업무(심사, 고객응대 등) 효율을 높일 수 있다고 생각한다." },
+            { id: "q6", category: "보안 및 윤리", text: "나는 업무 중 AI 활용 시 지켜야 할 보안 규정과 할루시네이션(환각 현상) 등 유의사항을 알고 있다." }
+        ];
+
+        const subjectiveQuestions = [
+            { id: "sq1", text: "현재 본인의 업무 중 AI(Gemini, NotebookLM 등)를 도입하면 가장 큰 효과를 볼 수 있다고 생각하는 분야는 무엇입니까?" },
+            { id: "sq2", text: "이번 교육에서 가장 중점적으로 다루었으면 하는 주제나 궁금한 점을 자유롭게 적어주세요." },
+            { id: "sq3", text: "사용하고 있는 AI 툴을 모두 작성해주세요 (유료, 무료 모두)" }
+        ];
+
+        let userChartInstance = null;
+        let adminChartInstance = null;
+
+        // Initialization
+        window.onload = () => {
+            renderForm();
+            generateMockDataIfNeeded();
+        };
+
+        // --- UI Flow & Rendering ---
+
+        function startSurvey() {
+            document.getElementById('view-intro').classList.add('hidden');
+            document.getElementById('view-survey').classList.remove('hidden');
+            window.scrollTo(0, 0);
+        }
+
+        function renderForm() {
+            const objContainer = document.getElementById('objective-container');
+            const subjContainer = document.getElementById('subjective-container');
+
+            // Render Objective
+            objectiveQuestions.forEach((q, index) => {
+                let html = `
+                <div class="mb-4">
+                    <p class="font-medium text-gray-800 mb-3"><span class="text-koreg-main font-bold mr-1">Q${index + 1}.</span> ${q.text}</p>
+                    <div class="overflow-x-auto pb-2">
+                        <div class="scale-container flex justify-between gap-2">
+                `;
+                scaleLabels.forEach((label, valIndex) => {
+                    const val = valIndex + 1;
+                    html += `
+                            <label class="flex-1 cursor-pointer relative group">
+                                <input type="radio" name="${q.id}" value="${val}" class="radio-custom sr-only" required>
+                                <div class="h-full border border-gray-300 rounded-lg p-3 text-center text-sm text-gray-600 bg-gray-50 hover:bg-gray-100 group-hover:border-koreg-main flex flex-col items-center justify-center gap-1">
+                                    <span class="text-lg font-bold">${val}</span>
+                                    <span class="text-xs break-keep">${label.substring(4)}</span>
+                                </div>
+                            </label>
+                    `;
+                });
+                html += `</div></div></div>`;
+                objContainer.innerHTML += html;
+            });
+
+            // Render Subjective
+            subjectiveQuestions.forEach((q, index) => {
+                let html = `
+                <div>
+                    <label class="block font-medium text-gray-800 mb-2"><span class="text-koreg-main font-bold mr-1">Q${index + objectiveQuestions.length + 1}.</span> ${q.text}</label>
+                    <textarea name="${q.id}" rows="3" class="w-full border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-koreg-main focus:border-transparent resize-none" placeholder="내용을 입력해주세요." required></textarea>
+                </div>
+                `;
+                subjContainer.innerHTML += html;
+            });
+        }
+
+        function checkFormValidity() {
+            const form = document.getElementById('surveyForm');
+            const btnSubmit = document.getElementById('btnSubmit');
+            if (form.checkValidity()) {
+                btnSubmit.disabled = false;
+                btnSubmit.classList.remove('bg-gray-300', 'text-gray-500', 'cursor-not-allowed');
+                btnSubmit.classList.add('bg-koreg-main', 'hover:bg-koreg-dark', 'text-white');
+            } else {
+                btnSubmit.disabled = true;
+                btnSubmit.classList.add('bg-gray-300', 'text-gray-500', 'cursor-not-allowed');
+                btnSubmit.classList.remove('bg-koreg-main', 'hover:bg-koreg-dark', 'text-white');
+            }
+        }
+
+        function submitSurvey() {
+            const form = document.getElementById('surveyForm');
+            if (!form.checkValidity()) {
+                showAlert('알림', '모든 문항에 응답해 주세요.');
+                return;
+            }
+
+            const formData = new FormData(form);
+            const resultData = {
+                objective: {},
+                subjective: {}
+            };
+
+            objectiveQuestions.forEach(q => { resultData.objective[q.id] = parseInt(formData.get(q.id)); });
+            subjectiveQuestions.forEach(q => { resultData.subjective[q.id] = formData.get(q.id); });
+
+            // Store current user result temporarily
+            window.currentUserResult = resultData;
+
+            // Save to localStorage for unified admin management (version 2)
+            let allData = JSON.parse(localStorage.getItem('koreg_mock_data_v2')) || [];
+            allData.push(resultData);
+            localStorage.setItem('koreg_mock_data_v2', JSON.stringify(allData));
+
+            // Show Result View
+            document.getElementById('view-survey').classList.add('hidden');
+            document.getElementById('view-result').classList.remove('hidden');
+            window.scrollTo(0, 0);
+
+            renderUserResults(resultData);
+        }
+
+        function renderUserResults(data) {
+            // Table mapping
+            const tbody = document.getElementById('result-table-body');
+            tbody.innerHTML = '';
+            let totalScore = 0;
+            
+            const categoryScores = {};
+            const categoryCounts = {};
+
+            objectiveQuestions.forEach((q, idx) => {
+                const score = data.objective[q.id];
+                totalScore += score;
+                
+                if(!categoryScores[q.category]) {
+                    categoryScores[q.category] = 0;
+                    categoryCounts[q.category] = 0;
+                }
+                categoryScores[q.category] += score;
+                categoryCounts[q.category] += 1;
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td class="px-4 py-3">Q${idx+1}. ${q.text}</td>
+                        <td class="px-4 py-3 text-right font-medium text-gray-900">${score}점</td>
+                    </tr>
+                `;
+            });
+
+            const avgScore = (totalScore / objectiveQuestions.length).toFixed(1);
+            document.getElementById('total-average-score').innerText = `${avgScore}점`;
+
+            // Subjective listing
+            const subjList = document.getElementById('result-subjective-list');
+            subjList.innerHTML = '';
+            subjectiveQuestions.forEach((q, idx) => {
+                const num = idx + objectiveQuestions.length + 1;
+                subjList.innerHTML += `
+                    <div class="bg-gray-50 p-4 rounded-lg border border-gray-100">
+                        <p class="font-medium text-gray-700 mb-2 text-xs">Q${num}. ${q.text}</p>
+                        <p class="text-gray-800 break-words">${data.subjective[q.id]}</p>
+                    </div>
+                `;
+            });
+
+            // Chart Data Prep
+            const labels = Object.keys(categoryScores);
+            const dataPoints = labels.map(label => (categoryScores[label] / categoryCounts[label]).toFixed(1));
+
+            // Render Chart
+            const ctx = document.getElementById('userResultChart').getContext('2d');
+            if (userChartInstance) userChartInstance.destroy();
+
+            userChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '영역별 평균 점수',
+                        data: dataPoints,
+                        backgroundColor: 'rgba(0, 76, 151, 0.7)',
+                        borderColor: 'rgba(0, 76, 151, 1)',
+                        borderWidth: 1,
+                        borderRadius: 4,
+                        barPercentage: 0.5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: true, max: 5, ticks: { stepSize: 1 } }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+        }
+
+        function resetSurvey() {
+            document.getElementById('surveyForm').reset();
+            checkFormValidity();
+            document.getElementById('view-result').classList.add('hidden');
+            document.getElementById('view-intro').classList.remove('hidden');
+            window.scrollTo(0, 0);
+        }
+
+        // --- Custom Alert System ---
+        function showAlert(title, message, type = 'alert', onConfirm = null) {
+            document.getElementById('alertTitle').innerText = title;
+            document.getElementById('alertMessage').innerText = message;
+            
+            const btnContainer = document.getElementById('alertButtons');
+            const inputContainer = document.getElementById('alertInputs');
+            btnContainer.innerHTML = '';
+            inputContainer.classList.add('hidden');
+            document.getElementById('adminPassword').value = '';
+
+            const modal = document.getElementById('customAlert');
+            const modalBox = document.getElementById('alertBox');
+            
+            modal.classList.remove('hidden');
+            setTimeout(() => modalBox.classList.remove('scale-95'), 10);
+
+            const closeFn = () => {
+                modalBox.classList.add('scale-95');
+                setTimeout(() => modal.classList.add('hidden'), 200);
+            };
+
+            if (type === 'alert') {
+                const btn = document.createElement('button');
+                btn.className = "w-full bg-koreg-main text-white font-bold py-2 rounded-lg hover:bg-koreg-dark";
+                btn.innerText = "확인";
+                btn.onclick = closeFn;
+                btnContainer.appendChild(btn);
+            } else if (type === 'prompt') {
+                inputContainer.classList.remove('hidden');
+                
+                const btnCancel = document.createElement('button');
+                btnCancel.className = "flex-1 bg-gray-200 text-gray-700 font-bold py-2 rounded-lg hover:bg-gray-300";
+                btnCancel.innerText = "취소";
+                btnCancel.onclick = closeFn;
+                
+                const btnConfirm = document.createElement('button');
+                btnConfirm.className = "flex-1 bg-koreg-main text-white font-bold py-2 rounded-lg hover:bg-koreg-dark";
+                btnConfirm.innerText = "확인";
+                btnConfirm.onclick = () => {
+                    const val = document.getElementById('adminPassword').value;
+                    if(onConfirm) onConfirm(val, closeFn);
+                };
+
+                btnContainer.appendChild(btnCancel);
+                btnContainer.appendChild(btnConfirm);
+            } else if (type === 'confirm') {
+                const btnCancel = document.createElement('button');
+                btnCancel.className = "flex-1 bg-gray-200 text-gray-700 font-bold py-2 rounded-lg hover:bg-gray-300";
+                btnCancel.innerText = "취소";
+                btnCancel.onclick = closeFn;
+                
+                const btnConfirm = document.createElement('button');
+                btnConfirm.className = "flex-1 bg-red-600 text-white font-bold py-2 rounded-lg hover:bg-red-700";
+                btnConfirm.innerText = "삭제";
+                btnConfirm.onclick = () => {
+                    if(onConfirm) onConfirm(null, closeFn);
+                };
+
+                btnContainer.appendChild(btnCancel);
+                btnContainer.appendChild(btnConfirm);
+            }
+        }
+
+        // --- Admin & Mock Data Logic ---
+        
+        function generateMockDataIfNeeded() {
+            // Generate 9 mock results to simulate the 10-person survey condition. (Version 2)
+            if (!localStorage.getItem('koreg_mock_data_v2')) {
+                const mockData = [];
+                const mockAnswers1 = ["방대한 보증심사 지침서(PDF) 요약 및 검색", "고객 상담 이력 분석", "기획안 및 안내문 초안 작성", "시장 동향 자료 수집"];
+                const mockAnswers2 = ["NotebookLM에 실제 재단 규정을 넣고 검색하는 실습", "Gemini 무료버전과 유료버전의 차이점", "프롬프트를 구체적으로 작성하는 공식", "보안 문제 없이 사용하는 법"];
+                const mockAnswers3 = ["ChatGPT(무료)", "사용안함", "Gemini Advanced(유료), ChatGPT(무료)", "뤼튼, Claude", "ChatGPT(유료)"];
+                
+                for(let i=0; i<9; i++) {
+                    let obj = {};
+                    objectiveQuestions.forEach(q => {
+                        // Random score 2 to 5 (reflecting realistic varied skill levels)
+                        obj[q.id] = Math.floor(Math.random() * 4) + 2; 
+                    });
+                    
+                    let subj = {
+                        sq1: mockAnswers1[Math.floor(Math.random() * mockAnswers1.length)],
+                        sq2: mockAnswers2[Math.floor(Math.random() * mockAnswers2.length)],
+                        sq3: mockAnswers3[Math.floor(Math.random() * mockAnswers3.length)]
+                    };
+                    
+                    mockData.push({ objective: obj, subjective: subj });
+                }
+                localStorage.setItem('koreg_mock_data_v2', JSON.stringify(mockData));
+            }
+        }
+
+        function openAdminAuth() {
+            showAlert('관리자 인증', '강사용 통계 확인을 위해 비밀번호를 입력하세요. (힌트: 1234)', 'prompt', (val, closeFn) => {
+                if(val === '1234') {
+                    closeFn();
+                    showAdminDashboard();
+                } else {
+                    closeFn();
+                    setTimeout(() => showAlert('오류', '비밀번호가 일치하지 않습니다.'), 300);
+                }
+            });
+        }
+
+        function showAdminDashboard() {
+            document.getElementById('view-intro').classList.add('hidden');
+            document.getElementById('view-survey').classList.add('hidden');
+            document.getElementById('view-result').classList.add('hidden');
+            document.getElementById('view-admin').classList.remove('hidden');
+            window.scrollTo(0, 0);
+
+            // Fetch data
+            let allData = JSON.parse(localStorage.getItem('koreg_mock_data_v2')) || [];
+            renderAdminData(allData);
+        }
+
+        function renderAdminData(dataArray) {
+            const participantCount = dataArray.length;
+            document.getElementById('admin-participant-count').innerText = participantCount;
+
+            if (participantCount === 0) {
+                document.getElementById('admin-avg-total').innerText = '0.0점';
+                document.getElementById('admin-subjective-list').innerHTML = '<tr><td colspan="5" class="px-4 py-8 text-center text-gray-500">제출된 응답 데이터가 없습니다.</td></tr>';
+                updateAdminChart([], []);
+                return;
+            }
+
+            const categoryTotals = {};
+            const categoryCounts = {};
+            let grandTotal = 0;
+            let totalAnswers = 0;
+
+            const subjListHTML = [];
+
+            dataArray.forEach((user, uIndex) => {
+                // aggregate objective
+                objectiveQuestions.forEach(q => {
+                    const score = user.objective[q.id] || 0;
+                    if(!categoryTotals[q.category]) {
+                        categoryTotals[q.category] = 0;
+                        categoryCounts[q.category] = 0;
+                    }
+                    categoryTotals[q.category] += score;
+                    categoryCounts[q.category] += 1;
+                    
+                    grandTotal += score;
+                    totalAnswers++;
+                });
+
+                // gather subjective (Fallback handle for older data struct if mixed)
+                const sq1Ans = user.subjective['sq1'] || '-';
+                const sq2Ans = user.subjective['sq2'] || '-';
+                const sq3Ans = user.subjective['sq3'] || '-';
+
+                subjListHTML.push(`
+                    <tr class="hover:bg-gray-50 transition-colors">
+                        <td class="px-4 py-3 border border-gray-200 text-center font-medium">${uIndex + 1}</td>
+                        <td class="px-4 py-3 border border-gray-200">${sq1Ans}</td>
+                        <td class="px-4 py-3 border border-gray-200">${sq2Ans}</td>
+                        <td class="px-4 py-3 border border-gray-200 text-blue-700 font-medium">${sq3Ans}</td>
+                        <td class="px-4 py-3 border border-gray-200 text-center no-print">
+                            <button onclick="deleteResponse(${uIndex})" class="px-3 py-1 bg-red-100 text-red-600 rounded hover:bg-red-200 text-xs font-bold transition-colors">삭제</button>
+                        </td>
+                    </tr>
+                `);
+            });
+
+            // Overall Average
+            const overallAvg = (grandTotal / totalAnswers).toFixed(2);
+            document.getElementById('admin-avg-total').innerText = `${overallAvg}점`;
+
+            // Render subjective table
+            document.getElementById('admin-subjective-list').innerHTML = subjListHTML.join('');
+
+            // Chart Prep
+            const labels = Object.keys(categoryTotals);
+            const dataPoints = labels.map(label => (categoryTotals[label] / (participantCount * (objectiveQuestions.filter(q=>q.category===label).length))).toFixed(2));
+
+            updateAdminChart(labels, dataPoints);
+        }
+
+        function updateAdminChart(labels, dataPoints) {
+            const ctx = document.getElementById('adminResultChart').getContext('2d');
+            if (adminChartInstance) adminChartInstance.destroy();
+
+            adminChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '전체 평균',
+                        data: dataPoints,
+                        backgroundColor: [
+                            'rgba(0, 76, 151, 0.8)',
+                            'rgba(0, 160, 233, 0.8)',
+                            'rgba(229, 240, 249, 0.8)'
+                        ],
+                        borderColor: [
+                            'rgba(0, 53, 107, 1)',
+                            'rgba(0, 112, 192, 1)',
+                            'rgba(180, 200, 220, 1)'
+                        ],
+                        borderWidth: 1,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: true, max: 5, ticks: { stepSize: 1 } }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+        }
+
+        function deleteResponse(index) {
+            showAlert('응답 삭제', '해당 교육생의 응답 데이터를 정말 삭제하시겠습니까?\n(삭제된 데이터는 복구할 수 없습니다.)', 'confirm', (val, closeFn) => {
+                let allData = JSON.parse(localStorage.getItem('koreg_mock_data_v2')) || [];
+                allData.splice(index, 1);
+                localStorage.setItem('koreg_mock_data_v2', JSON.stringify(allData));
+                renderAdminData(allData);
+                closeFn();
+            });
+        }
+
+        function exitAdmin() {
+            document.getElementById('view-admin').classList.add('hidden');
+            if(window.currentUserResult) {
+                document.getElementById('view-result').classList.remove('hidden');
+            } else {
+                document.getElementById('view-intro').classList.remove('hidden');
+            }
+        }
+    </script>
+</body>
+</html>
